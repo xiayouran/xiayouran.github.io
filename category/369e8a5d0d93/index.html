@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/180x180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiayouran.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"hide","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="附加一段文章摘要，字数最好在140字以内，会出现在meta的description里面">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微信公众号上部署自己训练的聊天机器人（腾讯云服务器+TensorFlow2.1+Django3.1）">
+<meta property="og:url" content="https://xiayouran.github.io/category/369e8a5d0d93/index.html">
+<meta property="og:site_name" content="夏小悠">
+<meta property="og:description" content="附加一段文章摘要，字数最好在140字以内，会出现在meta的description里面">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210110151030658.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210110151040727.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210110151313263.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210110151624961.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2021011015220360.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210110152357247.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210110152712739.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210110153011478.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210110184812801.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210110210200430.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210110210110540.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210110210615538.gif#pic_center">
+<meta property="article:published_time" content="2021-01-10T14:08:43.000Z">
+<meta property="article:modified_time" content="2021-12-14T11:21:11.225Z">
+<meta property="article:author" content="夏小悠">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="自然语言处理">
+<meta property="article:tag" content="模型部署">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20210110151030658.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+
+<link rel="canonical" href="https://xiayouran.github.io/category/369e8a5d0d93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>微信公众号上部署自己训练的聊天机器人（腾讯云服务器+TensorFlow2.1+Django3.1） | 夏小悠</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">夏小悠</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/xiayouran" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiayouran.github.io/category/369e8a5d0d93/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="夏小悠">
+      <meta itemprop="description" content="夏小悠的博客~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="夏小悠">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          微信公众号上部署自己训练的聊天机器人（腾讯云服务器+TensorFlow2.1+Django3.1）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-01-10 22:08:43" itemprop="dateCreated datePublished" datetime="2021-01-10T22:08:43+08:00">2021-01-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-12-14 19:21:11" itemprop="dateModified" datetime="2021-12-14T19:21:11+08:00">2021-12-14</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/NLP/" itemprop="url" rel="index"><span itemprop="name">NLP</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>11k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+            <div class="post-description">附加一段文章摘要，字数最好在140字以内，会出现在meta的description里面</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言">前言</h2>
+<p>  哈哈，重头戏终于来了，经过两天的服务器配置、模型训练，今天终于在微信公众号上部署了自己使用TensorFlow训练的聊天机器人。   本篇博客主要介绍一下Seq2Seq模型，以及模型训练后的部署，使用的深度学习框架为TensorFlow2.1，GPU为Tesla P100（白嫖Kaggle的），由于网站有时间限制，只训练了两个epoch就先部署了哈，所以机器人目前还很沙雕。</p>
+<blockquote>
+<p>  有关<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_42730750/article/details/112292993">腾讯云服务器配置流程</a>和<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_42730750/article/details/112366788">Django对接微信公众号以实现消息自动回复</a>可以参考这两篇博客。</p>
+</blockquote>
+<h2 id="模型介绍">1. 模型介绍</h2>
+<p>  <span class="math inline">\(Seq2Seq\)</span>的全称是<span class="math inline">\(Sequence\)</span> <span class="math inline">\(to\)</span> <span class="math inline">\(Sequence\)</span>，也就是我们常说的序列到序列模型，它是基于<span class="math inline">\(Encoder-Decoder\)</span>框架的<span class="math inline">\(RNN(Recurrent\)</span> <span class="math inline">\(Neural\)</span> <span class="math inline">\(Network,循环神经网络)\)</span>变种。<span class="math inline">\(Seq2Seq\)</span>引入<span class="math inline">\(Encoder-Decoder\)</span>框架，提高了神经网络对长文本信息的提取能力，取得了比单纯使用<span class="math inline">\(LSTM(Long\)</span> <span class="math inline">\(Short-Term\)</span> <span class="math inline">\(Memory,长短期记忆神经网络)\)</span>更好的效果。<span class="math inline">\(Seq2Seq\)</span>中有两个很重要的概念，一个就是上面提到的<span class="math inline">\(Encoder-Decoder\)</span>框架，另一个就是<span class="math inline">\(Attention\)</span>机制。这里简单介绍一下这两个概念。</p>
+<h3 id="encoder-decoder框架">1.1 Encoder-Decoder框架</h3>
+<p>  <span class="math inline">\(Encoder-Decoder\)</span>又称为编码器-解码器模型，顾名思义，它有两部分组成，即编码器和解码器。它是一种处理输入、输出长短不一的多对多文本预测问题的框架，其提供了有效的文本特征提取、输出预测的机制。</p>
+<p>  编码器的作用是对输入的文本信息进行有效的编码后，将其作为解码器的输入数据，其目的是对输入的文本信息进行特征提取，尽量准确高效地表征该文本的特征信息。</p>
+<p>  解码器的作用是从上下文的文本信息中获取尽可能多的特征，然后输出预测文本。根据对文本信息的获取方式不同，解码器一般分为4种结构，分别是直译式解码、循环式解码、增强式解码和注意力机制解码。 - 直译式解码：按照编码器的费那事进行逆操作得到的预测文本 - 循环式解码：将编码器输出的编码向量作为第一时刻的输入，然后将得到的输出作为下一个时刻的输入，依次进行循环解码 - 增强循环式解码：在循环式解码的基础上，每一时刻增加一个编码器输出的编码向量作为输入 - 注意力机制解码：在增强式循环解码的基础上增加注意力机制，这样可以有效地训练解码器在繁多的输入中重点关注某些有效特征信息，以增加解码器的特征获取能力，进而得到更好的解码效果。</p>
+<h3 id="attention机制">1.2 Attention机制</h3>
+<p>  虽然<span class="math inline">\(Encoder-Decoder\)</span>结构的模型在机器翻译、语音识别以及文本生成等诸多领域均取得了非常不错的效果，但同时也存在着不足之处。编码器将输入的序列编码成一个固定长度的向量，再由解码器将其解码，得到输出序列。但个固定长度的向量所具有的表征能力是有限的，解码器又受限于这个固定长度的向量，当输入的文本序列较长时，编码器很难将所有的重要信息都编码到这个定长的向量中，从而使得模型的输出结果大大折扣。</p>
+<p>  <span class="math inline">\(Attention\)</span>机制有效解决了输入长序列信息时真实含义难以获取的问题。在进行长文本序列处理的任务中，影响当前时刻状态的信息可能隐藏在前面的时刻里，根据马尔可夫假设，这些信息有可能就会被忽略掉。比如，在<code>“我快饿死了，今天搬了一天的砖，我要大吃一顿”</code>这句话中，我们知道<code>“我要大吃一顿”</code>是因为<code>“我快饿死了”</code>，但是基于马尔可夫假设，<code>“今天搬了一天的砖”</code>和<code>“我要大吃一顿”</code>在时序上离得更近，相比于<code>“我快饿死了”</code>，<code>“今天搬了一天的砖”</code>对<code>“我要大吃一顿”</code>的影响力更强，但是在真实的<span class="math inline">\(NLP(Natural\)</span> <span class="math inline">\(Language\)</span> <span class="math inline">\(Processing,自然语言处理)\)</span>中不是这样的。从这个例子中可以看出，神经网络模型没有办法很好地准确获取倒装时序的语言信息，要解决这个问题就需要经过训练自动建立起<code>“我要大吃一顿”</code>和<code>“我快饿死了”</code>的关联关系，这就是<span class="math inline">\(Attention\)</span>机制，即注意力机制。</p>
+<h3 id="代码实现">1.3 代码实现</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Encoder</span>(<span class="params">tf.keras.Model</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;编码器&quot;&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, vocab_size, embedding_dim, enc_units, batch_size</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(Encoder, self).__init__()</span><br><span class="line"></span><br><span class="line">        self.batch_size = batch_size</span><br><span class="line">        self.enc_units = enc_units</span><br><span class="line">        self.embedding = tf.keras.layers.Embedding(input_dim=vocab_size, output_dim=embedding_dim)</span><br><span class="line">        self.gru = tf.keras.layers.GRU(units=self.enc_units, recurrent_initializer=<span class="string">&#x27;glorot_uniform&#x27;</span>,</span><br><span class="line">                                       return_sequences=<span class="literal">True</span>, return_state=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">call</span>(<span class="params">self, x, hidden</span>):</span></span><br><span class="line">        <span class="comment"># 此处添加模型调用的代码（处理输入并返回输出）</span></span><br><span class="line">        x = self.embedding(x)</span><br><span class="line">        output, state = self.gru(inputs=x, initial_state=hidden)</span><br><span class="line">        <span class="keyword">return</span> output, state</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">initialize_hidden_state</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="keyword">return</span> tf.zeros(shape=(self.batch_size, self.enc_units))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BahdanauAttention</span>(<span class="params">tf.keras.Model</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;Bahdanau Attention&quot;&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, units</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(BahdanauAttention, self).__init__()</span><br><span class="line">        self.W1 = tf.keras.layers.Dense(units=units)</span><br><span class="line">        self.W2 = tf.keras.layers.Dense(units=units)</span><br><span class="line">        self.V = tf.keras.layers.Dense(units=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">call</span>(<span class="params">self, query, values</span>):</span></span><br><span class="line">        <span class="comment"># query为Encoder最后一个时间步的隐状态(hidden), shape为(batch_size, hidden_size)</span></span><br><span class="line">        <span class="comment"># values为Encoder部分的输出，即每个时间步的隐状态，shape为(batch_size, max_length, hidden_size)</span></span><br><span class="line">        <span class="comment"># 为方便后续计算，需将query的shape转为(batch_size, 1, hidden_size)</span></span><br><span class="line">        <span class="comment"># 给query增加一个维度</span></span><br><span class="line">        query = tf.expand_dims(<span class="built_in">input</span>=query, axis=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 计算score(相似度), 使用MLP网络，即再引入一个神经网络来专门计算score</span></span><br><span class="line">        <span class="comment"># score的shape为(batch_size, max_length, 1)</span></span><br><span class="line">        score = self.V(</span><br><span class="line">            inputs=tf.nn.tanh(self.W1(inputs=query) + self.W2(inputs=values))</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 计算attention_weights</span></span><br><span class="line">        <span class="comment"># 计算attention_weights的shape为(batch_size, max_length, 1)</span></span><br><span class="line">        attention_weights = tf.nn.softmax(logits=score, axis=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 计算context vector</span></span><br><span class="line">        <span class="comment"># context vector的shape为(batch_size, max_length, hidden_size)</span></span><br><span class="line">        context_vector = attention_weights * values</span><br><span class="line">        <span class="comment"># 加权求和</span></span><br><span class="line">        <span class="comment"># 求和之后的shape为(batch_size, hidden_size)</span></span><br><span class="line">        context_vector = tf.reduce_sum(input_tensor=context_vector, axis=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> context_vector, attention_weights</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Decoder</span>(<span class="params">tf.keras.Model</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;解码器&quot;&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, vocab_size, embedding_dim, dec_units, batch_size</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(Decoder, self).__init__()</span><br><span class="line"></span><br><span class="line">        self.batch_size = batch_size</span><br><span class="line">        self.dec_units = dec_units</span><br><span class="line">        self.embedding = tf.keras.layers.Embedding(input_dim=vocab_size, output_dim=embedding_dim)</span><br><span class="line">        self.gru = tf.keras.layers.GRU(units=self.dec_units, recurrent_initializer=<span class="string">&#x27;glorot_uniform&#x27;</span>,</span><br><span class="line">                                       return_sequences=<span class="literal">True</span>, return_state=<span class="literal">True</span>)</span><br><span class="line">        self.fc = tf.keras.layers.Dense(units=vocab_size)</span><br><span class="line">        self.attention = BahdanauAttention(units=self.dec_units)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">call</span>(<span class="params">self, x, hidden, enc_output</span>):</span></span><br><span class="line">        <span class="comment"># 获取context vector和attention weights</span></span><br><span class="line">        context_vector, attention_weights = self.attention(hidden, enc_output)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 编码之后x的shape为(batch_size, 1, embedding_dim)</span></span><br><span class="line">        x = self.embedding(inputs=x)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 将context_vector与输入x进行拼接</span></span><br><span class="line">        <span class="comment"># 拼接后的shape为(batch_size, 1, embedding_dim + hidden_size)</span></span><br><span class="line">        <span class="comment"># 这里的hidden_size即context_vector向量的长度</span></span><br><span class="line">        x = tf.concat(values=[tf.expand_dims(<span class="built_in">input</span>=context_vector, axis=<span class="number">1</span>), x], axis=-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 拼接后输入GRU网络</span></span><br><span class="line">        output, state = self.gru(inputs=x)</span><br><span class="line">        <span class="comment"># print(&quot;Decoder output shape: &#123;&#125;&quot;.format(output.shape))</span></span><br><span class="line">        <span class="comment"># print(&quot;Decoder state shape: &#123;&#125;&quot;.format(state.shape))</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># (batch_size, 1, hidden_size) ==&gt; (batch_size, hidden_size)</span></span><br><span class="line">        output = tf.reshape(tensor=output, shape=(-<span class="number">1</span>, output.shape[<span class="number">2</span>]))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># x的shape为(batch_size, vocab_size)</span></span><br><span class="line">        x = self.fc(inputs=output)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> x, state, attention_weights</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>  我也是这学期才开始入手TensorFlow2，以前用的都是TensorFlow 1.13.1，代码不明白的地方可以查看<a target="_blank" rel="noopener" href="https://tf.wiki/zh_hans/">《简单粗暴 TensorFlow 2》文档</a>。</p>
+</blockquote>
+<h2 id="安装依赖库">2. 安装依赖库</h2>
+<ul>
+<li>安装TensorFlow 2.1</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip3 install tensorflow==2.1.0</span><br></pre></td></tr></table></figure>
+<ul>
+<li>安装jieba</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip3 install jieba</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20210110151030658.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /> <img src="https://img-blog.csdnimg.cn/20210110151040727.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /></p>
+<h2 id="模型部署">3. 模型部署</h2>
+<p>  腾讯云服务器用的是学生版的1核2G，感觉不一定能够支撑模型运行，先尝试一下吧。在此之前还是在本地通过Postman进行一下测试：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210110151313263.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   还是OK的，就是模型加载的较慢，下面把模型文件以及相关代码上传到服务器的项目目录，目录内容更新为如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210110151624961.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   上传到服务器之后，大致等到模型差不多加载好就可以准备测试了，测试结果如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/2021011015220360.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   查看一下日志文件，发现了一些端倪： <img src="https://img-blog.csdnimg.cn/20210110152357247.png" alt="在这里插入图片描述" />   进程被杀死了，查了一下相关文件，说是超时了，enmmmmm，貌似有些道理【虽然不是很确定，但是模型确实是被重新加载了，更改了相关uwsgi的参数之后依旧是这个结果】，于是我直接上传了一个更改后的测试模型文件<code>CR.py</code>，直接在环境中运行，果不其然：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210110152712739.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /> <img src="https://img-blog.csdnimg.cn/20210110153011478.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   这应该是内存不够吧~OK，暂时到此结束。</p>
+<h2 id="section">---</h2>
+<p>  昨天出了一点意外，1核2G的腾讯云服务器运行不了这个模型，所以今天换成了2核4G的阿里云服务器【有一说一，阿里云的这个学生套餐还是挺实惠的，又成功白嫖】，阿里云的配置过程同腾讯云的一样，可参考<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_42730750/article/details/112292993">我的这篇博客</a>。</p>
+<p>  服务器配置完成之后，把项目文件上传到阿里云服务器的<code>wwwroot</code>文件夹下，然后进入<code>pyweb</code>虚拟环境，再次运行一下<code>CR.py</code>文件，看看模型能不能运行起来。结果如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210110184812801.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   还是很nice的，模型能够运行，OK，接入到微信公众号上，配置代码很简单，只需要把微信公众号发送过来的消息送入到模型即可，代码如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># views.py</span></span><br><span class="line"><span class="comment"># 导入模型的接口</span></span><br><span class="line">from tencent.chatRobot import predict</span><br><span class="line"></span><br><span class="line">input_info = recMsg.Content.decode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">try:</span><br><span class="line">	content = predict(sentence=input_info)</span><br><span class="line">except Exception as err:</span><br><span class="line">	content = <span class="string">&#x27;小悠没理解主银的意思~&#x27;</span></span><br><span class="line">replyMsg = TextMsg(toUser, fromUser, content)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>  当时，还考虑了很久，模型如何先被加载，因为模型加载的时间稍长，不能等到微信公众号消息来了再加载模型，那肯定会超时的，而且每次都加载，肯定还很麻烦。当时还考虑到用线程等方法来加载，enmmmmm，后来嘛，就突然想到，为何不用全局变量的形式来加载，就是Python执行的时候是顺序执行嘛，像函数、类之类的这种对象，虽然定义了，但只要不被调用，这些代码就不会被运行，而函数、类之外的代码会正常按顺序执行，相当于就是全局变量了嘛。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># chatRobot.py</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># @Time    : 2021/1/4 22:47</span></span><br><span class="line"><span class="comment"># @Author  : XiaYouRan</span></span><br><span class="line"><span class="comment"># @Email   : youran.xia@foxmail.com</span></span><br><span class="line"><span class="comment"># @File    : chatRobot.py</span></span><br><span class="line"><span class="comment"># @Software: PyCharm</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">import tensorflow as tf</span><br><span class="line">import jieba</span><br><span class="line">import os</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def preprocess_sentence(sentence):</span><br><span class="line">    <span class="string">&quot;&quot;</span><span class="string">&quot;</span></span><br><span class="line"><span class="string">    给句子添加开始和结束标记</span></span><br><span class="line"><span class="string">    :param sentence:</span></span><br><span class="line"><span class="string">    :return:</span></span><br><span class="line"><span class="string">    &quot;</span><span class="string">&quot;&quot;</span></span><br><span class="line">    sentence = <span class="string">&#x27;&lt;start&gt; &#x27;</span> + sentence + <span class="string">&#x27; &lt;end&gt;&#x27;</span></span><br><span class="line">    <span class="built_in">return</span> sentence</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def max_length(tensor):</span><br><span class="line">    <span class="string">&quot;&quot;</span><span class="string">&quot;</span></span><br><span class="line"><span class="string">    计算数据集中问句和答句中最长的句子长度</span></span><br><span class="line"><span class="string">    :param tensor:</span></span><br><span class="line"><span class="string">    :return:</span></span><br><span class="line"><span class="string">    &quot;</span><span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="built_in">return</span> max([len(t) <span class="keyword">for</span> t <span class="keyword">in</span> tensor])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def tokenize(sentences):</span><br><span class="line">    <span class="string">&quot;&quot;</span><span class="string">&quot;</span></span><br><span class="line"><span class="string">    分词器函数</span></span><br><span class="line"><span class="string">    :param sentence:</span></span><br><span class="line"><span class="string">    :return:</span></span><br><span class="line"><span class="string">    &quot;</span><span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 初始化分词器，并生成词典</span></span><br><span class="line">    sentence_tokenizer = tf.keras.preprocessing.text.Tokenizer(filters=<span class="string">&#x27;&#x27;</span>)</span><br><span class="line">    sentence_tokenizer.fit_on_texts(sentences)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 利用字典将文本数据转为id</span></span><br><span class="line">    <span class="comment"># 也是二维的</span></span><br><span class="line">    tensor = sentence_tokenizer.texts_to_sequences(texts=sentences)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 将数据填充成统一长度</span></span><br><span class="line">    <span class="comment"># 默认统一为最长句子长度</span></span><br><span class="line">    <span class="comment"># 将长为nb_samples的序列（标量序列）转化为形如(nb_samples,nb_timesteps) 2D numpy array</span></span><br><span class="line">    tensor = tf.keras.preprocessing.sequence.pad_sequences(tensor, maxlen=30, padding=<span class="string">&#x27;post&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">return</span> tensor, sentence_tokenizer</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def load_dataset(file_path):</span><br><span class="line">    with open(file_path, <span class="string">&#x27;r&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>) as f:</span><br><span class="line">        lines = f.readlines()</span><br><span class="line">        q = <span class="string">&#x27;&#x27;</span></span><br><span class="line">        a = <span class="string">&#x27;&#x27;</span></span><br><span class="line">        qa_pairs = []</span><br><span class="line">        <span class="comment"># len(lines) 总行数</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(len(lines)):</span><br><span class="line">            <span class="keyword">if</span> i % 3 == 0:</span><br><span class="line">                q = <span class="string">&#x27; &#x27;</span>.join(jieba.cut(lines[i].strip()))</span><br><span class="line">            <span class="keyword">elif</span> i % 3 == 1:</span><br><span class="line">                a = <span class="string">&#x27; &#x27;</span>.join(jieba.cut(lines[i].strip()))</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="comment"># 问句与答句进行组合</span></span><br><span class="line">                pair = [preprocess_sentence(q), preprocess_sentence(a)]</span><br><span class="line">                qa_pairs.append(pair)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># zip 拆解</span></span><br><span class="line">    q_sentences, a_sentences = zip(*qa_pairs)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># question数据集(id)及其分类器词汇表</span></span><br><span class="line">    q_tensor, q_tokenizer = tokenize(q_sentences)</span><br><span class="line">    <span class="comment"># answer数据集(id)及其分类器词汇表</span></span><br><span class="line">    a_tensor, a_tokenizer = tokenize(a_sentences)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">return</span> q_tensor, a_tensor, q_tokenizer, a_tokenizer</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Encoder(tf.keras.Model):</span><br><span class="line">    <span class="string">&quot;&quot;</span><span class="string">&quot;编码器&quot;</span><span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class BahdanauAttention(tf.keras.Model):</span><br><span class="line">    <span class="string">&quot;&quot;</span><span class="string">&quot;Bahdanau Attention&quot;</span><span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Decoder(tf.keras.Model):</span><br><span class="line">    <span class="string">&quot;&quot;</span><span class="string">&quot;解码器&quot;</span><span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用Adam优化器</span></span><br><span class="line">optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def predict(sentence):</span><br><span class="line">    <span class="string">&quot;&quot;</span><span class="string">&quot;模型测试&quot;</span><span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 加载模型</span></span><br><span class="line">    checkpoint = tf.train.Checkpoint(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),</span><br><span class="line">                                     encoder=encoder,</span><br><span class="line">                                     decoder=decoder)</span><br><span class="line">    checkpoint.restore(save_path=tf.train.latest_checkpoint(checkpoint_dir=checkpoint_dir))</span><br><span class="line"></span><br><span class="line">    sentence = <span class="string">&#x27; &#x27;</span>.join(jieba.cut(sentence.strip()))</span><br><span class="line">    sentence = preprocess_sentence(sentence=sentence)</span><br><span class="line"></span><br><span class="line">    inputs = [q_tokenizer.word_index[i] <span class="keyword">for</span> i <span class="keyword">in</span> sentence.split(<span class="string">&#x27; &#x27;</span>)]</span><br><span class="line">    inputs = tf.keras.preprocessing.sequence.pad_sequences(sequences=[inputs], maxlen=30, padding=<span class="string">&#x27;post&#x27;</span>)</span><br><span class="line">    inputs = tf.convert_to_tensor(value=inputs)</span><br><span class="line"></span><br><span class="line">    result = <span class="string">&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line">    hidden = [tf.zeros(shape=(1, units))]</span><br><span class="line">    enc_out, enc_hidden = encoder(inputs, hidden)</span><br><span class="line"></span><br><span class="line">    dec_hidden = enc_hidden</span><br><span class="line">    dec_input = tf.expand_dims(input=[a_tokenizer.word_index[<span class="string">&#x27;&lt;start&gt;&#x27;</span>]], axis=0)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> range(q_tesor_length):</span><br><span class="line">        predictions, dec_hidden, attention_weights = decoder(dec_input, dec_hidden, enc_out)</span><br><span class="line"></span><br><span class="line">        predicted_id = tf.argmax(predictions[0]).numpy()</span><br><span class="line">        result += a_tokenizer.index_word[predicted_id] + <span class="string">&#x27; &#x27;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> a_tokenizer.index_word[predicted_id] == <span class="string">&#x27;&lt;end&gt;&#x27;</span>:</span><br><span class="line">            <span class="built_in">break</span></span><br><span class="line"></span><br><span class="line">        dec_input = tf.expand_dims(input=[predicted_id], axis=0)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># print(&quot;Q: %s&quot; % sentence[8:-6].replace(&#x27; &#x27;, &#x27;&#x27;))</span></span><br><span class="line">    <span class="comment"># print(&quot;A: &#123;&#125;&quot;.format(result[:-6].replace(&#x27; &#x27;, &#x27;&#x27;)))</span></span><br><span class="line">    <span class="comment"># print(&quot;A: &#123;&#125;&quot;.format(result.replace(&#x27; &#x27;, &#x27;&#x27;)))</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">return</span> result[:-6].replace(<span class="string">&#x27; &#x27;</span>, <span class="string">&#x27;&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">file_path = os.path.dirname(__file__)</span><br><span class="line">corpus_path = os.path.join(file_path, <span class="string">&#x27;dataset/corpus.txt&#x27;</span>)</span><br><span class="line"></span><br><span class="line">checkpoint_dir = os.path.join(file_path, <span class="string">&#x27;model/train_checkpoints&#x27;</span>)</span><br><span class="line"></span><br><span class="line">q_tensor, a_tensor, q_tokenizer, a_tokenizer = load_dataset(file_path=corpus_path)</span><br><span class="line"></span><br><span class="line">q_tesor_length = max_length(q_tensor)</span><br><span class="line">a_tesor_length = max_length(a_tensor)</span><br><span class="line"></span><br><span class="line">buffer_size = len(q_tensor)</span><br><span class="line">batch_size = 32</span><br><span class="line">steps_per_epoch = len(q_tensor) // batch_size</span><br><span class="line">embedding_dim = 128</span><br><span class="line">units = 256</span><br><span class="line"></span><br><span class="line"><span class="comment"># q_tokenizer.word_index 字典类型(word, id)</span></span><br><span class="line">vocab_q_size = len(q_tokenizer.word_index) + 1</span><br><span class="line">vocab_a_size = len(a_tokenizer.word_index) + 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模型初始化</span></span><br><span class="line">encoder = Encoder(vocab_size=vocab_q_size, embedding_dim=embedding_dim, enc_units=units, batch_size=batch_size)</span><br><span class="line">attention_layer = BahdanauAttention(units=10)</span><br><span class="line">decoder = Decoder(vocab_size=vocab_a_size, embedding_dim=embedding_dim, dec_units=units, batch_size=batch_size)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    input_sentence = <span class="string">&quot;Start chatting...&quot;</span></span><br><span class="line">    <span class="keyword">while</span> input_sentence != <span class="string">&quot;stop&quot;</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;请输入：&quot;</span>)</span><br><span class="line">        input_sentence = input()</span><br><span class="line">        try:</span><br><span class="line">            predict(input_sentence)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;----------------------&quot;</span>)</span><br><span class="line">        except Exception as err:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;Test model error info: &#x27;</span>, err)</span><br></pre></td></tr></table></figure>
+<h2 id="测试">4. 测试</h2>
+<p>  首先要把微信公众号的基本配置改一下，把那个服务器地址更改成阿里云的公网IP，然后启动服务器就可以了(大致需要五六分钟)。</p>
+<p>  测试的结果如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210110210200430.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   目前来看，机器人还很沙雕，毕竟只训练了两个epoch，准备再多训练几次，不过整体来看还蛮好的，部署的流程成功的走了一下，接下来就开始继续训练模型了。</p>
+<p>  在阿里云后台看了一下服务器，模型确实比较吃内存，4G内存占用了近80%，怪不得2G内存不够用！</p>
+<p><img src="https://img-blog.csdnimg.cn/20210110210110540.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   总的来说，很OK，很nice！！！！想体验的小伙伴们，欢迎来玩哦，关注微信公众号<code>夏悠然</code>。</p>
+<figure>
+<img src="https://img-blog.csdnimg.cn/20210110210615538.gif#pic_center" alt="在这里插入图片描述" /><figcaption aria-hidden="true">在这里插入图片描述</figcaption>
+</figure>
+
+    </div>
+	
+	<!-- 添加文章结束标记 -->
+    <div>
+		
+			<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+
+		
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>夏小悠
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://xiayouran.github.io/category/369e8a5d0d93/index.html" title="微信公众号上部署自己训练的聊天机器人（腾讯云服务器+TensorFlow2.1+Django3.1）">https://xiayouran.github.io/category/369e8a5d0d93/index.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+              <a href="/tags/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 自然语言处理</a>
+              <a href="/tags/%E6%A8%A1%E5%9E%8B%E9%83%A8%E7%BD%B2/" rel="tag"><i class="fa fa-tag"></i> 模型部署</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/category/cc6276429244/index.html" rel="next" title="机器学习之逻辑回归">
+      机器学习之逻辑回归 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.</span> <span class="nav-text">1. 模型介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#encoder-decoder%E6%A1%86%E6%9E%B6"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 Encoder-Decoder框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#attention%E6%9C%BA%E5%88%B6"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 Attention机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.3.</span> <span class="nav-text">1.3 代码实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96%E5%BA%93"><span class="nav-number">3.</span> <span class="nav-text">2. 安装依赖库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E9%83%A8%E7%BD%B2"><span class="nav-number">4.</span> <span class="nav-text">3. 模型部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#section"><span class="nav-number">5.</span> <span class="nav-text">---</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">6.</span> <span class="nav-text">4. 测试</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">夏小悠</p>
+  <div class="site-description" itemprop="description">夏小悠的博客~</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/xiayouran" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;xiayouran" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_42730750?type=blog" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_42730750?type&#x3D;blog" rel="noopener" target="_blank"><i class="fas fa-copyright fa-fw"></i>CSDN</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:youran.xia@foxmail.com" title="E-Mail → mailto:youran.xia@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2019 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fas fa-fan"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">夏小悠</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">25k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">22 分钟</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/three-waves.min.js"></script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+    </div>
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/src/clicklove.js"></script>
+
+</body>
+</html>
