@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/180x180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiayouran.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"hide","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本篇文章介绍一下Pycharm如何配置远程连接信息，使其能够在本地使用服务器上的GPU等硬件资源，并在本地完成代码的运行与调试。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pycharm远程连接服务器进行代码的运行与调试">
+<meta property="og:url" content="https://xiayouran.github.io/category/ddf311bf68a0/index.html">
+<meta property="og:site_name" content="夏小悠のBlog">
+<meta property="og:description" content="本篇文章介绍一下Pycharm如何配置远程连接信息，使其能够在本地使用服务器上的GPU等硬件资源，并在本地完成代码的运行与调试。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/3735f56efe5e48c6ac11e1880deed6fc.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/72aa91dc56024d61bf9f78d1ad222570.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/8abcb30ad94c41deaaf76a56f81d2b6b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/e004948aab594fbf8c103302f5d617ad.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/65110457b29949f88b8c8b795789d4e0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/99ad34cf12c14b6c9cd739e1792a9774.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/4b7f618a4f1843519fdb6618ec96abd9.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/4e2eef19c9544064bcaa3bccc151eaf5.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/191d0eeb456a4c628705b35136a90931.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/56a6e05bf9754ebab5a1065abac524f0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/3fe27f9970bf44a9b69f3c79652d1ec5.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/d3761818cd6f4d67bfd030d2fee98167.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/97dd8d1947574dfaa19bf9865dc87ce0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/aa380c53620b463daad25dcee8e8b51d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/c61e6ea53071465e907ba6108290bb33.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/3dd649b42c674a7eb9dc56eefa19bdf8.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/6794fe798dcf447498dbfefa4d15cc21.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/9803740b4be94cce8c8c92c805225b44.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/af93bca60e474729b0855e51bcda6913.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/7c034e8a5d9d47f9a95a176d1625e3c7.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/0c995a73790646f3977862a50a16b759.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/5b6990ea380c48f996eb5a478139655f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/e8a6897b265b4b78b8c3a57302997248.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210419171612199.jpg#pic_center">
+<meta property="article:published_time" content="2021-07-31T04:35:55.000Z">
+<meta property="article:modified_time" content="2021-12-24T10:51:11.788Z">
+<meta property="article:author" content="夏小悠">
+<meta property="article:tag" content="Pycharm">
+<meta property="article:tag" content="远程连接">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/3735f56efe5e48c6ac11e1880deed6fc.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+
+<link rel="canonical" href="https://xiayouran.github.io/category/ddf311bf68a0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Pycharm远程连接服务器进行代码的运行与调试 | 夏小悠のBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">夏小悠のBlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/xiayouran" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiayouran.github.io/category/ddf311bf68a0/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="夏小悠">
+      <meta itemprop="description" content="夏小悠的博客~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="夏小悠のBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Pycharm远程连接服务器进行代码的运行与调试
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-31 12:35:55" itemprop="dateCreated datePublished" datetime="2021-07-31T12:35:55+08:00">2021-07-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-12-24 18:51:11" itemprop="dateModified" datetime="2021-12-24T18:51:11+08:00">2021-12-24</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index"><span itemprop="name">基础配置</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+            <div class="post-description">本篇文章介绍一下Pycharm如何配置远程连接信息，使其能够在本地使用服务器上的GPU等硬件资源，并在本地完成代码的运行与调试。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言">前言</h2>
+<p>  本篇文章介绍一下 Pycharm 如何配置远程连接信息，使其能够在本地使用服务器上的GPU等硬件资源，并在本地完成代码的运行与调试。</p>
+<p>  所需软硬件环境：</p>
+<table>
+<thead>
+<tr class="header">
+<th>环境</th>
+<th>版本</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>本地系统</td>
+<td><code>Windows 10</code></td>
+</tr>
+<tr class="even">
+<td>服务器</td>
+<td><code>Ubuntu 20.04</code></td>
+</tr>
+<tr class="odd">
+<td>IDE</td>
+<td><code>Pycharm 2021.1.3</code></td>
+</tr>
+<tr class="even">
+<td>代码目录</td>
+<td><code>F:\Python\PyTorch\amc-master</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="配置ssh连接服务器">1. 配置SSH连接服务器</h2>
+<figure>
+<img src="https://img-blog.csdnimg.cn/3735f56efe5e48c6ac11e1880deed6fc.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /><figcaption aria-hidden="true">在这里插入图片描述</figcaption>
+</figure>
+<p><img src="https://img-blog.csdnimg.cn/72aa91dc56024d61bf9f78d1ad222570.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   <kbd>Tools</kbd> <span class="math inline">\(--&gt;\)</span> <kbd>Deployment</kbd> <span class="math inline">\(--&gt;\)</span> <kbd>Configuration</kbd> 对连接服务器信息进行配置</p>
+<blockquote>
+<p>  可能有的小伙伴工具栏没有<code>Tools</code>这一个选项，通常是破解后的软件没有这一选项，可以双击<code>Shift</code>键，输入<code>Tools</code>进行搜索可以找到： <img src="https://img-blog.csdnimg.cn/8abcb30ad94c41deaaf76a56f81d2b6b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /> <img src="https://img-blog.csdnimg.cn/e004948aab594fbf8c103302f5d617ad.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /> <img src="https://img-blog.csdnimg.cn/65110457b29949f88b8c8b795789d4e0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /></p>
+</blockquote>
+<p>  先点击<kbd>+</kbd>，选择<kbd>SFTP</kbd>，创建一个<code>web server</code>：</p>
+<p><img src="https://img-blog.csdnimg.cn/99ad34cf12c14b6c9cd739e1792a9774.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   我的<code>web server</code>的名字是<code>Ubuntu-py38</code>，然后按下面的图示进行配置<code>SSH</code>：</p>
+<p><img src="https://img-blog.csdnimg.cn/4b7f618a4f1843519fdb6618ec96abd9.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /> <img src="https://img-blog.csdnimg.cn/4e2eef19c9544064bcaa3bccc151eaf5.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /> &gt;  <code>Host：</code> 服务器IP &gt;  <code>User name：</code> 用户名 &gt;  <code>Password：</code> 用户登录密码</p>
+<p>  然后点击<kbd>Test Connection</kbd>，出现<code>Successful connected！</code>表示与服务器建立了连接，若连接失败，请检查服务器是否开启了<code>SSH</code>；然后点击<kbd>Apply</kbd>应用该配置。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看ssh是否启动(sshd 说明已启动)</span></span><br><span class="line">ps -e |grep ssh</span><br><span class="line"><span class="comment"># 若没有启动可通过下面这条命令开启</span></span><br><span class="line">service ssh start</span><br><span class="line"></span><br><span class="line"><span class="comment"># 若没有安装ssh, 可通过以下命令安装</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install openssh-server</span><br></pre></td></tr></table></figure>
+<p>  然后再点击<code>Deployment</code>页面中的<kbd>Test Connection</kbd>，也是OK的</p>
+<figure>
+<img src="https://img-blog.csdnimg.cn/191d0eeb456a4c628705b35136a90931.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /><figcaption aria-hidden="true">在这里插入图片描述</figcaption>
+</figure>
+<h2 id="配置代码文件同步路径">2. 配置代码文件同步路径</h2>
+<p>  接着就配置在<code>Pycharm</code>显示的服务器的根目录，这里将<code>Root path</code>配置为<code>/home/liyanpeng/pywork</code>，这里不建议填写根目录或其他目录，否则<code>Pycharm</code>会显示服务器上的该目录下的所有文件夹及其文件。</p>
+<p><img src="https://img-blog.csdnimg.cn/56a6e05bf9754ebab5a1065abac524f0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   接着点击一下<kbd>Mappings</kbd>选项卡来配置目录的映射信息，该目录将存放本地同步到服务器上的文件：</p>
+<p><img src="https://img-blog.csdnimg.cn/3fe27f9970bf44a9b69f3c79652d1ec5.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /> &gt;  <code>Local path:</code> 表示本地的工程代码路径，默认已经自动填充 &gt;  <code>Deployment path:</code> 表示服务器端的相对路径，相对于<code>Root path</code>来说的，这里默认不填，但会有一个警告信息，而且会导致后面代码无法同步，根据箭头所指的信息，这里填上 <code>/</code></p>
+<figure>
+<img src="https://img-blog.csdnimg.cn/d3761818cd6f4d67bfd030d2fee98167.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /><figcaption aria-hidden="true">在这里插入图片描述</figcaption>
+</figure>
+<h2 id="同步代码到服务器上">3. 同步代码到服务器上</h2>
+<p>  接着依次点击<kbd>Tools</kbd> <span class="math inline">\(--&gt;\)</span> <kbd>Deployment</kbd> <span class="math inline">\(--&gt;\)</span> <kbd>Sync With Local</kbd>来将本地代码同步到服务器上：</p>
+<p><img src="https://img-blog.csdnimg.cn/97dd8d1947574dfaa19bf9865dc87ce0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /> <img src="https://img-blog.csdnimg.cn/aa380c53620b463daad25dcee8e8b51d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /></p>
+<figure>
+<img src="https://img-blog.csdnimg.cn/c61e6ea53071465e907ba6108290bb33.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /><figcaption aria-hidden="true">在这里插入图片描述</figcaption>
+</figure>
+<h2 id="配置远程python运行环境">4. 配置远程Python运行环境</h2>
+<p>  默认是本地的<code>Anaconda</code>环境，因为我们的代码是要在服务器上跑，所以需要使用服务器上的<code>Python</code>环境，下面添加服务器上的<code>Python</code>环境：</p>
+<p><img src="https://img-blog.csdnimg.cn/3dd649b42c674a7eb9dc56eefa19bdf8.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   按照图示选择刚刚创建的<code>web server</code>，下面有一行字<code>Remote SDK is saved in IDE settings，so it needs the SSH configuration to be saved there too.</code>，意思是说，远程的<code>SDK</code>保存在了<code>IDE settings</code>中，所以<code>SSH</code>的配置信息也要保存在那里，点击<code>Move</code>将配置信息移动到<code>IDE settings</code>中，然后点击<kbd>Next</kbd>。</p>
+<p><img src="https://img-blog.csdnimg.cn/6794fe798dcf447498dbfefa4d15cc21.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   然后就会看到远程的<code>Python</code>解析器所在的目录以及项目代码默认的路径，第一个可以不改，但最好改成在服务器上安装好的<code>anaconda</code>的环境，方便管理，我的<code>anaconda</code>环境为<code>/home/liyanpeng/anaconda3/envs/torch/bin/python</code>；下面的代码同步的文件路径换成我们在配制同步代码文件时的那个路径<code>/home/liyanpeng/pywork</code>：</p>
+<p><img src="https://img-blog.csdnimg.cn/9803740b4be94cce8c8c92c805225b44.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /> <img src="https://img-blog.csdnimg.cn/af93bca60e474729b0855e51bcda6913.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /> <img src="https://img-blog.csdnimg.cn/7c034e8a5d9d47f9a95a176d1625e3c7.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   配置完成之后，会自动对代码文件做一个同步：</p>
+<p><img src="https://img-blog.csdnimg.cn/0c995a73790646f3977862a50a16b759.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   可以看到代码中已经没有红色的缺少库文件错误信息，且经过<code>Debug</code>，显示的是服务器端的<code>Python</code>环境：</p>
+<p><img src="https://img-blog.csdnimg.cn/5b6990ea380c48f996eb5a478139655f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /> <img src="https://img-blog.csdnimg.cn/e8a6897b265b4b78b8c3a57302997248.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /></p>
+<p>  OK，配置完毕！</p>
+<h2 id="结束语">结束语</h2>
+<p>  不知不觉间，已经毕业一个多月了，也已经一个多月没有也文章了，<code>Markdown</code>的一些命令都快忘记了，哈哈哈哈哈。突然由学校转到工作上，还真有点小不适应，前段时间一直在忙着熟悉工作岗位，感觉节奏有点小快，哈哈哈哈，冲冲冲！！！！</p>
+<figure>
+<img src="https://img-blog.csdnimg.cn/20210419171612199.jpg#pic_center" alt="在这里插入图片描述" /><figcaption aria-hidden="true">在这里插入图片描述</figcaption>
+</figure>
+
+    </div>
+	
+	<!-- 添加文章结束标记 -->
+    <div>
+		
+			<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+
+		
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>夏小悠
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://xiayouran.github.io/category/ddf311bf68a0/index.html" title="Pycharm远程连接服务器进行代码的运行与调试">https://xiayouran.github.io/category/ddf311bf68a0/index.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/Pycharm/" rel="tag"><i class="fa fa-tag"></i> Pycharm</a>
+              <a href="/tags/%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5/" rel="tag"><i class="fa fa-tag"></i> 远程连接</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/category/1164cc4cb502/index.html" rel="prev" title="Windows 10环境下如何将MySQL 8.0和MongoDB 4.4数据库迁移至CentOS 8系统中">
+      <i class="fa fa-chevron-left"></i> Windows 10环境下如何将MySQL 8.0和MongoDB 4.4数据库迁移至CentOS 8系统中
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/category/2093899da53a/index.html" rel="next" title="torchnet.meter使用教程">
+      torchnet.meter使用教程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEssh%E8%BF%9E%E6%8E%A5%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">2.</span> <span class="nav-text">1. 配置SSH连接服务器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6%E5%90%8C%E6%AD%A5%E8%B7%AF%E5%BE%84"><span class="nav-number">3.</span> <span class="nav-text">2. 配置代码文件同步路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E4%BB%A3%E7%A0%81%E5%88%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A"><span class="nav-number">4.</span> <span class="nav-text">3. 同步代码到服务器上</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E8%BF%9C%E7%A8%8Bpython%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83"><span class="nav-number">5.</span> <span class="nav-text">4. 配置远程Python运行环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9D%9F%E8%AF%AD"><span class="nav-number">6.</span> <span class="nav-text">结束语</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">夏小悠</p>
+  <div class="site-description" itemprop="description">夏小悠的博客~</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/xiayouran" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;xiayouran" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_42730750?type=blog" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_42730750?type&#x3D;blog" rel="noopener" target="_blank"><i class="fas fa-copyright fa-fw"></i>CSDN</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:youran.xia@foxmail.com" title="E-Mail → mailto:youran.xia@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2019 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fas fa-fan"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">夏小悠</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">38k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">34 分钟</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/three-waves.min.js"></script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+    </div>
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/src/clicklove.js"></script>
+
+</body>
+</html>

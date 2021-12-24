@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/180x180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiayouran.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"hide","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在网上爬取的小视频(.ts格式)打不开怎么搞？使用IDM下载有时候还会出现数据受法律保护，IDM无法下载该内容，如何解决？这篇博客就来聊聊如何正确提取m3u8文件里的.ts视频，并合成完整的.mp4格式视频。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python爬虫：从m3u8文件里提取小视频的正确操作">
+<meta property="og:url" content="https://xiayouran.github.io/category/d7e98b1a98c8/index.html">
+<meta property="og:site_name" content="夏小悠のBlog">
+<meta property="og:description" content="在网上爬取的小视频(.ts格式)打不开怎么搞？使用IDM下载有时候还会出现数据受法律保护，IDM无法下载该内容，如何解决？这篇博客就来聊聊如何正确提取m3u8文件里的.ts视频，并合成完整的.mp4格式视频。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210506211609884.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210506211850140.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210511100746278.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210511102946566.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210511103037753.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210511105525802.gif#pic_center">
+<meta property="article:published_time" content="2021-05-11T03:04:17.000Z">
+<meta property="article:modified_time" content="2021-12-24T10:57:29.276Z">
+<meta property="article:author" content="夏小悠">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="爬虫">
+<meta property="article:tag" content="m3u8">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20210506211609884.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center">
+
+<link rel="canonical" href="https://xiayouran.github.io/category/d7e98b1a98c8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Python爬虫：从m3u8文件里提取小视频的正确操作 | 夏小悠のBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">夏小悠のBlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/xiayouran" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiayouran.github.io/category/d7e98b1a98c8/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="夏小悠">
+      <meta itemprop="description" content="夏小悠的博客~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="夏小悠のBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Python爬虫：从m3u8文件里提取小视频的正确操作
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-05-11 11:04:17" itemprop="dateCreated datePublished" datetime="2021-05-11T11:04:17+08:00">2021-05-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-12-24 18:57:29" itemprop="dateModified" datetime="2021-12-24T18:57:29+08:00">2021-12-24</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">Python爬虫</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+            <div class="post-description">在网上爬取的小视频(.ts格式)打不开怎么搞？使用IDM下载有时候还会出现数据受法律保护，IDM无法下载该内容，如何解决？这篇博客就来聊聊如何正确提取m3u8文件里的.ts视频，并合成完整的.mp4格式视频。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言">前言</h2>
+<p>  在网上爬取的小视频(.ts格式)打不开怎么搞？使用IDM下载有时候还会出现<code>数据受法律保护，IDM无法下载该内容</code>，如何解决？这篇博客就来聊聊如何正确提取m3u8文件里的<code>.ts</code>视频，并合成完整的<code>.mp4</code>格式视频。</p>
+<p><img src="https://img-blog.csdnimg.cn/20210506211609884.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /> <img src="https://img-blog.csdnimg.cn/20210506211850140.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /></p>
+<h2 id="hls协议与m3u8文件">1. HLS协议与m3u8文件</h2>
+<p>  <code>HLS</code>，即 <span class="math inline">\(HTTP\ Live\ Streaming\)</span>的缩写，是由苹果公司提出基于HTTP的流媒体网络传输协议。是苹果公司QuickTime X和iPhone软件系统的一部分。它的工作原理是把整个流分成一个个小的基于HTTP的文件来下载，每次只下载一些。当媒体流正在播放时，客户端可以选择从许多不同的备用源中以不同的速率下载同样的资源，允许流媒体会话适应不同的数据速率。在开始一个流媒体会话时，客户端会下载一个包含元数据的扩展 M3U (m3u8) 播放列表文件，用于寻找可用的媒体流。   <code>M3U8</code>是 <span class="math inline">\(Unicode\)</span> 版本的 M3U，用 UTF-8 编码。"M3U"和"M3U8"文件都是苹果公司使用的 <span class="math inline">\(HTTP\ Live\ Streaming\)</span> 格式的基础，这种格式可以在 iPhone 和 Macbook 等设备播放。是一种播放多媒体列表的文件格式，文本内容是一系列媒体片段资源，顺序播放该片段资源，即可完整展示多媒体资源。其格式大致如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 未加密</span></span><br><span class="line"><span class="comment">#EXTM3U</span></span><br><span class="line"><span class="comment">#EXT-X-VERSION:3</span></span><br><span class="line"><span class="comment">#EXT-X-TARGETDURATION:8</span></span><br><span class="line"><span class="comment">#EXT-X-MEDIA-SEQUENCE:0</span></span><br><span class="line"><span class="comment">#EXTINF:4.000000,</span></span><br><span class="line">1af12fece7a000000.ts</span><br><span class="line"><span class="comment">#EXTINF:4.320000,</span></span><br><span class="line">1af12fece7a000001.ts</span><br><span class="line">...</span><br><span class="line"><span class="comment">#EXTINF:3.800000,</span></span><br><span class="line">1af12fece7a001155.ts</span><br><span class="line"><span class="comment">#EXT-X-ENDLIST</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 加密</span></span><br><span class="line"><span class="comment">#EXTM3U</span></span><br><span class="line"><span class="comment">#EXT-X-VERSION:3</span></span><br><span class="line"><span class="comment">#EXT-X-TARGETDURATION:6</span></span><br><span class="line"><span class="comment">#EXT-X-PLAYLIST-TYPE:VOD</span></span><br><span class="line"><span class="comment">#EXT-X-MEDIA-SEQUENCE:0</span></span><br><span class="line"><span class="comment">#EXT-X-KEY:METHOD=AES-128,URI=&quot;https://ts1.yuyuangewh.com:9999/20200808/1XdSSbTb/2000kb/hls/key.key&quot;</span></span><br><span class="line"><span class="comment">#EXTINF:3,</span></span><br><span class="line">https://ts1.yuyuangewh.com:9999/20200808/1XdSSbTb/2000kb/hls/EUtRrqJU.ts</span><br><span class="line"><span class="comment">#EXTINF:4.72,</span></span><br><span class="line">https://ts1.yuyuangewh.com:9999/20200808/1XdSSbTb/2000kb/hls/HF90vrrN.ts</span><br><span class="line">...</span><br><span class="line"><span class="comment">#EXTINF:0.24,</span></span><br><span class="line">https://ts1.yuyuangewh.com:9999/20200808/1XdSSbTb/2000kb/hls/b7ZLcRqT.ts</span><br><span class="line"><span class="comment">#EXT-X-ENDLIST</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>  <a target="_blank" rel="noopener" href="https://www.tw.wiiaa.top/baike-HTTP_Live_Streaming">中文维基百科----HTTP Live Streaming</a>   <a target="_blank" rel="noopener" href="https://www.tw.wiiaa.top/baike-M3U">中文维基百科----M3U</a></p>
+</blockquote>
+<p>  下面介绍几个<code>m3u8文件</code>中常见的标签：</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>标签</th>
+<th>格式</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>EXTM3U</code></td>
+<td><code>#EXTM3U</code></td>
+<td>表明该文件是一个m3u8文件，每个m3u8文件必须将该标签放置在第一行</td>
+</tr>
+<tr class="even">
+<td><code>EXT-X-VERSION</code></td>
+<td><code>EXT-X-VERSION:&lt;number&gt;</code></td>
+<td>表明该文件是一个m3u8文件，每个m3u8文件必须将该标签放置在第一行</td>
+</tr>
+<tr class="odd">
+<td><code>EXT-X-TARGETDURATION</code></td>
+<td><code>#EXT-X-TARGETDURATION:&lt;s&gt;</code></td>
+<td>表示每个视频分段最大的时长（单位秒）</td>
+</tr>
+<tr class="even">
+<td><code>EXT-X-PLAYLIST-TYPE</code></td>
+<td><code>#EXT-X-PLAYLIST-TYPE:&lt;type-enum&gt;</code></td>
+<td>表明流媒体类型，<code>VOD</code> 表示该视屏流为点播源，因此服务器不能更改该<code>m3u8</code>文件；<code>EVENT</code>表示该视频流为直播源，因此服务器不能更改或删除该文件任意部分内容，但是可以在文件末尾添加新内容</td>
+</tr>
+<tr class="odd">
+<td><code>EXT-X-MEDIA-SEQUENCE</code></td>
+<td><code>#EXT-X-MEDIA-SEQUENCE:&lt;number&gt;</code></td>
+<td>表示播放列表第一个URL片段文件的序列号，每个媒体片段URL都拥有一个唯一的整型序列号，每个媒体片段序列号按出现顺序依次加 1，如果该标签未指定，则默认序列号从0开始</td>
+</tr>
+<tr class="even">
+<td><code>EXT-X-KEY</code></td>
+<td><code>#EXT-X-KEY:METHOD=AES-128,URI="http:xxxx",IV="xxxx"</code></td>
+<td>表明视频流文件的加解密方法，<code>METHOD</code>表示加密方式，<code>URI</code>表示密钥路径，该密钥是一个 16 字节的数据，<code>IV</code>是一个128位的十六进制数值</td>
+</tr>
+<tr class="odd">
+<td><code>EXTINF</code></td>
+<td><code>#EXTINF:&lt;duration&gt;,[&lt;title&gt;]</code></td>
+<td>表示其后 URL 指定的媒体片段时长（单位为秒），<code>duration</code>可以为十进制的整型或者浮点型，其值必须小于或等于<code>EXT-X-TARGETDURATION</code>指定的值</td>
+</tr>
+<tr class="even">
+<td><code>EXT-X-ENDLIST</code></td>
+<td><code>#EXT-X-ENDLIST</code></td>
+<td>表明m3u8文件的结束</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>  <a target="_blank" rel="noopener" href="https://www.jianshu.com/p/e97f6555a070">简书：m3u8 文件格式详解 作者：Whyn</a></p>
+</blockquote>
+<h2 id="第三方库----m3u8">2. 第三方库----m3u8</h2>
+<blockquote>
+<p>  <code>m3u8</code>是一个专门用于解析m3u8文件的解析器，有关库的详细操作请参阅<a target="_blank" rel="noopener" href="https://pypi.org/project/m3u8/">官方示例</a></p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装m3u8</span></span><br><span class="line">pip install m3u8</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 加载m3u8文件</span></span><br><span class="line">import m3u8</span><br><span class="line"></span><br><span class="line"><span class="comment"># 返回一个M3U8对象</span></span><br><span class="line">playlist = m3u8.load(uri=<span class="string">&#x27;http://videoserver.com/playlist.m3u8&#x27;</span>)	<span class="comment"># url</span></span><br><span class="line"><span class="comment"># playlist = m3u8.load(uri=&#x27;playlist.m3u8&#x27;)	# file</span></span><br><span class="line"><span class="built_in">print</span>(playlist.segments)	<span class="comment"># 打印EXT-X-KEY标签和所有的EXTINF标签:</span></span><br><span class="line"><span class="built_in">print</span>(playlist.target_duration)	<span class="comment"># 打印EXT-X-TARGETDURATION标签的值</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> key <span class="keyword">in</span> playlist.keys:</span><br><span class="line">	<span class="keyword">if</span> key:</span><br><span class="line">		<span class="comment"># 如果视频文件加密，可以查看加密参数</span></span><br><span class="line">		<span class="built_in">print</span>(key.uri, key.method, key.iv)</span><br></pre></td></tr></table></figure>
+<h2 id="合成mp4文件">3. 合成mp4文件</h2>
+<p><img src="https://img-blog.csdnimg.cn/20210511100746278.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   本次就以这个视频为例，流程如下：   <code>1.</code> 找到视频对应的<code>.m3u8</code>文件   <code>2.</code> 解析<code>.m3u8</code>文件，从中提取<code>.ts</code>视频的url   <code>3.</code> 下载<code>.ts</code>格式的视频   <code>4.</code> 解密<code>.ts</code>格式的视频（如果视频流没有加密，则该步不是必须的）   <code>5.</code> 合成<code>.mp4</code>或其他格式的视频</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 第1步，我下载了m3u8文件，也可以直接使用m3u8文件对应的url</span></span><br><span class="line">playlist = m3u8.load(uri=<span class="string">&#x27;./data/index.m3u8&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第2步，提取URL</span></span><br><span class="line"><span class="keyword">for</span> seg <span class="keyword">in</span> playlist.segments:</span><br><span class="line">       <span class="built_in">print</span>(seg.uri)</span><br><span class="line">   </span><br><span class="line">   <span class="comment"># 第3步，下载ts视频</span></span><br><span class="line">   with open(<span class="string">&#x27;xxxxx.ts&#x27;</span>, <span class="string">&#x27;wb&#x27;</span>) as f:</span><br><span class="line">       ts = get_ts(url)</span><br><span class="line">       f.write(ts)</span><br><span class="line">  </span><br><span class="line"><span class="comment"># 第4步，解密</span></span><br><span class="line">cipher_text = pad(data_to_pad=cipher_text, block_size=AES.block_size)</span><br><span class="line">   aes = AES.new(key=key, mode=AES.MODE_CBC, iv=iv)</span><br><span class="line">   cipher_text = aes.decrypt(cipher_text)</span><br><span class="line">   </span><br><span class="line"><span class="comment"># 第5步，合成</span></span><br><span class="line">files = glob.glob(os.path.join(<span class="string">&#x27;./video&#x27;</span>, <span class="string">&#x27;*.ts&#x27;</span>))</span><br><span class="line">   <span class="keyword">for</span> file <span class="keyword">in</span> files:</span><br><span class="line">       with open(file, <span class="string">&#x27;rb&#x27;</span>) as fr, open(<span class="string">&#x27;./video_de/baitoushan.mp4&#x27;</span>, <span class="string">&#x27;ab&#x27;</span>) as fw:</span><br><span class="line">           content = fr.read()</span><br><span class="line">           fw.write(content )</span><br></pre></td></tr></table></figure>
+<h2 id="完整代码">4. 完整代码</h2>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># @Time    : 2021/5/10 20:11</span></span><br><span class="line"><span class="comment"># @Author  : XiaYouRan</span></span><br><span class="line"><span class="comment"># @Email   : youran.xia@foxmail.com</span></span><br><span class="line"><span class="comment"># @File    : video.py</span></span><br><span class="line"><span class="comment"># @Software: PyCharm</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> Crypto.Cipher <span class="keyword">import</span> AES</span><br><span class="line"><span class="keyword">from</span> Crypto.Util.Padding <span class="keyword">import</span> pad</span><br><span class="line"><span class="keyword">from</span> concurrent.futures <span class="keyword">import</span> ThreadPoolExecutor</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> m3u8</span><br><span class="line"><span class="keyword">import</span> glob</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">logging.getLogger(<span class="string">&quot;urllib3&quot;</span>).setLevel(logging.WARNING)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">AESDecrypt</span>(<span class="params">cipher_text, key, iv</span>):</span></span><br><span class="line">    cipher_text = pad(data_to_pad=cipher_text, block_size=AES.block_size)</span><br><span class="line">    aes = AES.new(key=key, mode=AES.MODE_CBC, iv=iv)</span><br><span class="line">    cipher_text = aes.decrypt(cipher_text)</span><br><span class="line">    <span class="comment"># clear_text = unpad(padded_data=cipher_text, block_size=AES.block_size)</span></span><br><span class="line">    <span class="keyword">return</span> cipher_text</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">headers = &#123;<span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&#x27;Mozilla/5.0 (Windows NT 10.0; Win64; x64) &#x27;</span></span><br><span class="line">                         <span class="string">&#x27;AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36&#x27;</span>&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_ts</span>(<span class="params">url</span>):</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        response = requests.get(url, verify=<span class="literal">False</span>)</span><br><span class="line">        response.raise_for_status()</span><br><span class="line">        response.encoding = <span class="string">&#x27;utf-8&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> response.content</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> err:</span><br><span class="line">        <span class="built_in">print</span>(err)</span><br><span class="line">        <span class="keyword">return</span> <span class="string">b&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">save_ts</span>(<span class="params">url, index</span>):</span></span><br><span class="line">    filename = os.path.join(<span class="string">&#x27;./video&#x27;</span>, <span class="built_in">str</span>(index).zfill(<span class="number">5</span>) + <span class="string">&#x27;.ts&#x27;</span>)</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(filename, <span class="string">&#x27;wb&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        ts = get_ts(url)</span><br><span class="line">        f.write(ts)</span><br><span class="line">    <span class="built_in">print</span>(filename + <span class="string">&#x27; is ok!&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    playlist = m3u8.load(uri=<span class="string">&#x27;./data/index.m3u8&#x27;</span>)</span><br><span class="line"></span><br><span class="line">	<span class="comment"># 线程池，引入index可以防止合成时视频发生乱序</span></span><br><span class="line">    <span class="keyword">with</span> ThreadPoolExecutor(max_workers=<span class="number">10</span>) <span class="keyword">as</span> pool:</span><br><span class="line">        <span class="keyword">for</span> index, seg <span class="keyword">in</span> <span class="built_in">enumerate</span>(playlist.segments):</span><br><span class="line">            pool.submit(save_ts, seg.uri, index)</span><br><span class="line"></span><br><span class="line">    key = get_ts(playlist.keys[-<span class="number">1</span>].uri)</span><br><span class="line"></span><br><span class="line">    files = glob.glob(os.path.join(<span class="string">&#x27;./video&#x27;</span>, <span class="string">&#x27;*.ts&#x27;</span>))</span><br><span class="line">    <span class="keyword">for</span> file <span class="keyword">in</span> files:</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(file, <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> fr, <span class="built_in">open</span>(<span class="string">&#x27;./video_de/baitoushan.mp4&#x27;</span>, <span class="string">&#x27;ab&#x27;</span>) <span class="keyword">as</span> fw:</span><br><span class="line">            content = fr.read()</span><br><span class="line">            encontent = AESDecrypt(content, key=key, iv=key)</span><br><span class="line">            fw.write(encontent)</span><br><span class="line">        <span class="built_in">print</span>(file + <span class="string">&#x27; is ok!&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>  下载<code>.ts</code>文件效果如下：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210511102946566.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" />   合成<code>.mp4</code>文件效果如下：</p>
+<figure>
+<img src="https://img-blog.csdnimg.cn/20210511103037753.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNzMwNzUw,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /><figcaption aria-hidden="true">在这里插入图片描述</figcaption>
+</figure>
+<figure>
+<img src="https://img-blog.csdnimg.cn/20210511105525802.gif#pic_center" alt="在这里插入图片描述" /><figcaption aria-hidden="true">在这里插入图片描述</figcaption>
+</figure>
+<h2 id="结束语">5. 结束语</h2>
+<table>
+<thead>
+<tr class="header">
+<th>fo</th>
+<th>nt face="仿宋" size=4&gt;Musicer开源代码仓库</font></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>em</td>
+<td>sp; <a target="_blank" rel="noopener" href="https://github.com/xiayouran/Musicer">Musicer</a>音乐爬虫已经开源了哦，持续更新中，欢迎来踩来Star哦！ヾ(≧∇≦*)ヾ</td>
+</tr>
+<tr class="even">
+<td>em</td>
+<td>sp; 如果对Python爬虫感兴趣的话，欢迎关注我的<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_42730750/category_10252266.html">爬虫专栏</a>，有问题及时联系哦！</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+	
+	<!-- 添加文章结束标记 -->
+    <div>
+		
+			<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+
+		
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>夏小悠
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://xiayouran.github.io/category/d7e98b1a98c8/index.html" title="Python爬虫：从m3u8文件里提取小视频的正确操作">https://xiayouran.github.io/category/d7e98b1a98c8/index.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+              <a href="/tags/%E7%88%AC%E8%99%AB/" rel="tag"><i class="fa fa-tag"></i> 爬虫</a>
+              <a href="/tags/m3u8/" rel="tag"><i class="fa fa-tag"></i> m3u8</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/category/cc6276429244/index.html" rel="prev" title="机器学习之逻辑回归">
+      <i class="fa fa-chevron-left"></i> 机器学习之逻辑回归
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/category/8a2755226444/index.html" rel="next" title="机器学习中常用的聚类数据集生成方法">
+      机器学习中常用的聚类数据集生成方法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hls%E5%8D%8F%E8%AE%AE%E4%B8%8Em3u8%E6%96%87%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">1. HLS协议与m3u8文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BA%93----m3u8"><span class="nav-number">3.</span> <span class="nav-text">2. 第三方库----m3u8</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%88%E6%88%90mp4%E6%96%87%E4%BB%B6"><span class="nav-number">4.</span> <span class="nav-text">3. 合成mp4文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E4%BB%A3%E7%A0%81"><span class="nav-number">5.</span> <span class="nav-text">4. 完整代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9D%9F%E8%AF%AD"><span class="nav-number">6.</span> <span class="nav-text">5. 结束语</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">夏小悠</p>
+  <div class="site-description" itemprop="description">夏小悠的博客~</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/xiayouran" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;xiayouran" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_42730750?type=blog" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_42730750?type&#x3D;blog" rel="noopener" target="_blank"><i class="fas fa-copyright fa-fw"></i>CSDN</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:youran.xia@foxmail.com" title="E-Mail → mailto:youran.xia@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2019 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fas fa-fan"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">夏小悠</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">38k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">34 分钟</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/three-waves.min.js"></script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+    </div>
+  
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/src/clicklove.js"></script>
+
+</body>
+</html>
